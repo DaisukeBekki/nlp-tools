@@ -1,6 +1,6 @@
 # juman-tools: Haskell wrapper for JUMAN++/KNP
 
-形態素解析器JUMAN++(JUMAN)と係り受け解析器KNPのHaskellラッパーです。
+A Haskell wrapper for JUMAN++(JUMAN) and KNP.
 
 ## Requirements
 - [形態素解析機JUMAN++](http://nlp.ist.i.kyoto-u.ac.jp/index.php?JUMAN++)
@@ -17,10 +17,9 @@ $ brew install haskell-stack
 ```
 See https://docs/haskellstack.org/en/stable/README/#how-to-install for details.
 
-Do the following in the directory under which you'd like to install *lightblue*.
+Do the following in the directory under which you'd like to install juman-tools.
 ```
 $ git clone https://github.com/DaisukeBekki/JSeM.git
-
 ```
 This operation will create the directory "JSeM" (henceforth we will refer to this directory as <jsem>) under the current directory.
 
