@@ -1,0 +1,40 @@
+name:                juman-tools
+version:             0.1.0.0
+synopsis:            Haskell wrapper for Juman++ and KNP
+description:         Please see the README on GitHub at <https://github.com/DaisukeBekki/juman-tools#readme>
+author:              Daisuke Bekki
+maintainer:          bekki@is.ocha.ac.jp
+copyright:           Daisuke Bekki
+license:             LGPL
+github:              DaisukeBekki/juman-tools
+ghc-options:         -Wall
+extra-source-files:
+- README.md
+- ChangeLog.md
+dependencies:
+  - base >= 4.9 && < 5
+  - text >= 1.2
+  - process >= 1.2
+  - parsec >= 3.1
+  - shelly >= 1.6
+  - filepath >= 1.4
+  - directory >= 1.2
+  - vector >= 0.12
+library:
+  source-dirs: src
+  default-extensions: OverloadedStrings
+  exposed-modules:
+  - Text.Juman
+  - Text.KNP
+  other-modules: []
+executables:
+  calljuman:
+    main:         calljuman.hs
+    source-dirs:  app
+    ghc-options:  ["-threaded", "-rtsopts", "-with-rtsopts=-N"]
+    dependencies: juman-tools
+  callknp:
+    main:         callknp.hs
+    source-dirs:  app
+    ghc-options:  ["-threaded", "-rtsopts", "-with-rtsopts=-N"]
+    dependencies: juman-tools
