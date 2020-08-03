@@ -1,7 +1,8 @@
 resolver: lts-13.1
 flags: {}
 extra-deps:
-  - ../../.local/lib/chatter
+  - git: git://github.com/creswick/chatter.git
+    commit: a10cb59f5d70fd2a5def35a319ea254a2db3004d
   - cereal-text-0.1.0.2
   - fullstop-0.1.4
   - tokenize-0.3.0
