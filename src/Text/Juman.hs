@@ -5,6 +5,7 @@ module Text.Juman (
   callJuman
   ,fromFile
   ,fromText
+  ,text2JumanData
   ,jumanParser
   ,jumanLine
   ,printJumanData
@@ -17,6 +18,7 @@ import qualified Shelly as S             --shelly
 import Text.Parsec      --parsec
 import Text.Parsec.Text --parsec
 
+-- | コマンドライン引数で指定したファイルをJuman++で解析し、結果を標準出力に返す。
 callJuman :: IO()
 callJuman = do
   (filepath:_) <- E.getArgs
@@ -34,6 +36,12 @@ fromText :: T.Text -> IO([T.Text])
 fromText text = do
   jumanOutput <- S.shelly $ S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["echo ", text, " | jumanpp "]
   return $ filter (/= T.empty) $ T.lines jumanOutput
+
+-- | テキストに対しJuman++を呼び出し、分析行のリスト（[JumanData]型）を返す。
+text2JumanData :: T.Text -> IO([JumanData])
+text2JumanData text = do
+  lines <- fromText text
+  return $ map jumanParser lines
 
 -- | Juman分析行のためのデータ形式。
 -- | 入力形態素 読み 原型 品詞 品詞ID 品詞細分類 細分類ID 活用型 活用型ID 活用形 活用形ID その他の情報
