@@ -1,14 +1,14 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Text.Juman (
   JumanData (..),
   callJuman
-  ,fromFile
+  ,file2jumanData
+  ,text2jumanData
   ,fromText
-  ,text2JumanData
+  ,fromFile
   ,jumanParser
   ,jumanLine
   ,printJumanData
+  ,jumanLight
   ) where
 
 import qualified System.Environment as E --base
@@ -17,31 +17,48 @@ import qualified Data.Text.IO as T       --text
 import qualified Shelly as S             --shelly
 import Text.Parsec      --parsec
 import Text.Parsec.Text --parsec
+import Text.Distiller (cleanse)          --juman-tools
 
 -- | コマンドライン引数で指定したファイルをJuman++で解析し、結果を標準出力に返す。
 callJuman :: IO()
 callJuman = do
   (filepath:_) <- E.getArgs
-  texts <- fromFile filepath
-  mapM_ (printJumanData . jumanParser) texts
+  jumanData <- S.shelly $ file2jumanData filepath
+  mapM_ printJumanData jumanData
 
--- | ファイル内のテキストに対しJuman++を呼び出し、分析行のリストを返す。
-fromFile :: FilePath -> IO([T.Text])
-fromFile filepath = do
-  jumanOutput <- S.shelly $ S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["cat ", T.pack filepath, " | nkf -w | jumanpp "]
-  return $ filter (/= T.empty) $ T.lines jumanOutput
-
--- | テキストに対しJuman++を呼び出し、分析行のリストを返す。
+-- | テキストに対しJuman++を呼び出し、分析行のリストを返す。Deprecated.
 fromText :: T.Text -> IO([T.Text])
 fromText text = do
   jumanOutput <- S.shelly $ S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["echo ", text, " | jumanpp "]
   return $ filter (/= T.empty) $ T.lines jumanOutput
 
+-- | ファイル内のテキストに対しJuman++を呼び出し、分析行のリストを返す。Deprecated.
+fromFile :: FilePath -> IO([T.Text])
+fromFile filepath = do
+  jumanOutput <- S.shelly $ S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["cat ", T.pack filepath, " | nkf -w | jumanpp "]
+  return $ filter (/= T.empty) $ T.lines jumanOutput
+
+{-
 -- | テキストに対しJuman++を呼び出し、分析行のリスト（[JumanData]型）を返す。
 text2JumanData :: T.Text -> IO([JumanData])
 text2JumanData text = do
-  lines <- fromText text
-  return $ map jumanParser lines
+  lns <- fromText text
+  return $ map jumanParser lns
+-}
+
+-- | catするとcleanseできない
+-- | T.Textだとnkfできない、という問題をどうする？
+file2jumanData :: FilePath -> S.Sh([JumanData])
+file2jumanData filepath = do
+  text <- S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["cat ", T.pack filepath, " | nkf -w -Lu "]
+  jumanData <- mapM text2jumanData $ T.lines text
+  return $ concat jumanData
+
+text2jumanData :: T.Text -> S.Sh([JumanData])
+text2jumanData text = do
+  jumanLines <- S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["echo ", cleanse text, " | jumanpp "]
+  return $ map jumanParser $ filter (/= T.empty) $ T.lines jumanLines
+
 
 -- | Juman分析行のためのデータ形式。
 -- | 入力形態素 読み 原型 品詞 品詞ID 品詞細分類 細分類ID 活用型 活用型ID 活用形 活用形ID その他の情報
@@ -166,4 +183,20 @@ altWord = do
   sep
   sonota <- nonSep
   return $ AltWord nyuryoku yomi genkei hinsi hinsiID hinsiSaibunrui saibunruiID katuyogata katuyogataID katuyokei katuyokeiID sonota
+
+-- | テキストを受け取り、jumanで語に区切ったのち、動詞・名詞・形容詞・副詞のみ返す。this will be deprecated.
+jumanLight :: T.Text -> IO (T.Text, [T.Text])
+jumanLight text = do
+  jumandata <- S.shelly $ text2jumanData text
+  return $ (text, filter (/= T.empty) $ map (\j -> case j of
+                                  JumanWord _ _ word pos _ _ _ _ _ _ _ _ | T.isPrefixOf "動詞" pos -> word
+                                                                         | T.isPrefixOf "名詞" pos -> word
+                                                                         | T.isPrefixOf "形容詞" pos -> word
+                                                                         | T.isPrefixOf "副詞" pos -> word
+                                                                         | otherwise -> T.empty
+                                  AltWord _ _ _ _ _ _ _ _ _ _ _ _ -> T.empty
+                                  EOS -> T.empty
+                                  Err _ _ -> T.empty
+                                  ) jumandata)
+
 

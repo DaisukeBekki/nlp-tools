@@ -1,7 +1,7 @@
 module Text.Distiller (
   collectText,
   canonicalize,
-  juman,
+  cleanse,
   degree2color
   ) where
 
@@ -11,7 +11,6 @@ import qualified System.Directory as D --directory
 import qualified Data.Text as T        --text
 --import qualified Data.Text.IO as T   --text
 import qualified Shelly as S           --shelly
-import Text.Juman as J                 --juman-tools
 --import NLP.Similarity.VectorSim as N --chatter
 --import NLP.Types as N                --chatter
 
@@ -55,22 +54,6 @@ convertLoop (h:ts) buffer result
 
 isDelimiter :: T.Text -> Bool
 isDelimiter t = t=="2." || t=="3." || t=="4." || t=="5." || t=="6." || t=="7." || t=="8." || t=="9." || t=="10." || t=="11." || t=="12." || t=="13." || T.isPrefixOf "（2）" t || T.isPrefixOf "（3）" t || T.isPrefixOf "（4）" t || T.isPrefixOf "（5）" t || t=="1" || t=="2" || t=="3" || t=="4" || t=="5" || t=="6" || t=="7" || t=="8" || t=="9"
-
--- | テキストを受け取り、jumanで語に区切って返す
-juman :: T.Text -> IO (T.Text, [T.Text])
-juman text = do
-  jtexts <- J.fromText text
-  let jumandata = map J.jumanParser jtexts
-  return $ (text, filter (/= T.empty) $ map (\j -> case j of
-                                  JumanWord _ _ word pos _ _ _ _ _ _ _ _ | T.isPrefixOf "動詞" pos -> word
-                                                                         | T.isPrefixOf "名詞" pos -> word
-                                                                         | T.isPrefixOf "形容詞" pos -> word
-                                                                         | T.isPrefixOf "副詞" pos -> word
-                                                                         | otherwise -> T.empty
-                                  AltWord _ _ _ _ _ _ _ _ _ _ _ _ -> T.empty
-                                  EOS -> T.empty
-                                  Err _ _ -> T.empty
-                                  ) jumandata)
 
 degree2color :: Double -> String
 degree2color d

@@ -1,5 +1,5 @@
 name:                juman-tools
-version:             0.1.3
+version:             0.1.4
 synopsis:            Haskell tools for Juman++ and KNP
 description:         Please see the README on GitHub at <https://github.com/DaisukeBekki/juman-tools#readme>
 author:              Daisuke Bekki
@@ -27,20 +27,22 @@ library:
   - Text.Juman
   - Text.KNP
   - Text.Distiller
+  - Text.Juman.LangModel
+  - Text.Brat
   other-modules: []
 executables:
   calljuman:
     main:         calljuman.hs
     source-dirs:  app
     ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
-    dependencies: juman-tools >= 0.1.2
+    dependencies: juman-tools >= 0.1.4
   callknp:
     main:         callknp.hs
     source-dirs:  app
     ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
-    dependencies: juman-tools >= 0.1.2
+    dependencies: juman-tools >= 0.1.4
   prepareCorpus:
     main:         prepareCorpus.hs
     source-dirs:  app
     ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
-    dependencies: juman-tools >= 0.1.2
+    dependencies: juman-tools >= 0.1.4
