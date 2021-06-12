@@ -1,0 +1,118 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 176edfc12bc7bcf417c69f7a87e4c821f99f63e544e12e3972581b55074a8044
+
+name:           juman-tools
+version:        0.1.5
+synopsis:       Haskell tools for Juman++ and KNP
+description:    Please see the README on GitHub at <https://github.com/DaisukeBekki/juman-tools#readme>
+homepage:       https://github.com/DaisukeBekki/juman-tools#readme
+bug-reports:    https://github.com/DaisukeBekki/juman-tools/issues
+author:         Daisuke Bekki
+maintainer:     bekki@is.ocha.ac.jp
+copyright:      Daisuke Bekki
+license:        LGPL
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/DaisukeBekki/juman-tools
+
+library
+  exposed-modules:
+      Text.Juman
+      Text.Juman.LangModel
+      Text.KNP
+      Text.Distiller
+      Text.Brat
+      Text.Directory
+  hs-source-dirs:
+      src
+  default-extensions: OverloadedStrings
+  ghc-options: -Wall
+  build-depends:
+      aeson >=1.0
+    , base >=4.9 && <5
+    , bytestring >=0.10
+    , directory >=1.2
+    , filepath >=1.4
+    , parsec >=3.1
+    , process >=1.2
+    , shelly >=1.6
+    , text >=1.2
+    , vector >=0.12
+    , yaml >=0.8.3
+  default-language: Haskell2010
+
+executable calljuman
+  main-is: calljuman.hs
+  other-modules:
+      Paths_juman_tools
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson >=1.0
+    , base >=4.9 && <5
+    , bytestring >=0.10
+    , directory >=1.2
+    , filepath >=1.4
+    , juman-tools >=0.1.5
+    , parsec >=3.1
+    , process >=1.2
+    , shelly >=1.6
+    , text >=1.2
+    , vector >=0.12
+    , yaml >=0.8.3
+  default-language: Haskell2010
+
+executable callknp
+  main-is: callknp.hs
+  other-modules:
+      Paths_juman_tools
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson >=1.0
+    , base >=4.9 && <5
+    , bytestring >=0.10
+    , directory >=1.2
+    , filepath >=1.4
+    , juman-tools >=0.1.5
+    , parsec >=3.1
+    , process >=1.2
+    , shelly >=1.6
+    , text >=1.2
+    , vector >=0.12
+    , yaml >=0.8.3
+  default-language: Haskell2010
+
+executable prepareCorpus
+  main-is: prepareCorpus.hs
+  other-modules:
+      Paths_juman_tools
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson >=1.0
+    , base >=4.9 && <5
+    , bytestring >=0.10
+    , directory >=1.2
+    , filepath >=1.4
+    , juman-tools >=0.1.5
+    , parsec >=3.1
+    , process >=1.2
+    , shelly >=1.6
+    , text >=1.2
+    , vector >=0.12
+    , yaml >=0.8.3
+  default-language: Haskell2010

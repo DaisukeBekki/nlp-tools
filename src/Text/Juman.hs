@@ -1,8 +1,10 @@
 module Text.Juman (
   JumanData (..),
   callJuman
-  ,file2jumanData
+  ,text2jumanLine
+  ,file2jumanLine
   ,text2jumanData
+  ,file2jumanData
   ,fromText
   ,fromFile
   ,jumanParser
@@ -17,7 +19,7 @@ import qualified Data.Text.IO as T       --text
 import qualified Shelly as S             --shelly
 import Text.Parsec      --parsec
 import Text.Parsec.Text --parsec
-import Text.Distiller (cleanse)          --juman-tools
+--import Text.Distiller (cleanse)          --juman-tools
 
 -- | コマンドライン引数で指定したファイルをJuman++で解析し、結果を標準出力に返す。
 callJuman :: IO()
@@ -26,13 +28,16 @@ callJuman = do
   jumanData <- S.shelly $ file2jumanData filepath
   mapM_ printJumanData jumanData
 
--- | テキストに対しJuman++を呼び出し、分析行のリストを返す。Deprecated.
+-- | Deprecated.  Use text2jumanLine instead.
+-- | テキストに対しJuman++を呼び出し、分析行のリストを返す。
 fromText :: T.Text -> IO([T.Text])
 fromText text = do
   jumanOutput <- S.shelly $ S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["echo ", text, " | jumanpp "]
   return $ filter (/= T.empty) $ T.lines jumanOutput
 
--- | ファイル内のテキストに対しJuman++を呼び出し、分析行のリストを返す。Deprecated.
+
+-- | Deprecated.  Use file2jumanLine instead.
+-- | ファイル内のテキストに対しJuman++を呼び出し、分析行のリストを返す。
 fromFile :: FilePath -> IO([T.Text])
 fromFile filepath = do
   jumanOutput <- S.shelly $ S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["cat ", T.pack filepath, " | nkf -w | jumanpp "]
@@ -46,19 +51,27 @@ text2JumanData text = do
   return $ map jumanParser lns
 -}
 
--- | catするとcleanseできない
--- | T.Textだとnkfできない、という問題をどうする？
-file2jumanData :: FilePath -> S.Sh([JumanData])
-file2jumanData filepath = do
-  text <- S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["cat ", T.pack filepath, " | nkf -w -Lu "]
-  jumanData <- mapM text2jumanData $ T.lines text
-  return $ concat jumanData
+{-- | catするとcleanseできない
+-- | T.Textだとnkfできない、という問題をどうするか
+-}
+
+-- | テキスト(UTF8, Linux CR)に対しJuman++を呼び出し、分析行を返す。
+text2jumanLine :: T.Text -> S.Sh(T.Text)
+text2jumanLine text = S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["echo ", text, " | jumanpp "]
+
+-- | ファイル内のテキストに対しJuman++を呼び出し、分析行を返す。
+file2jumanLine :: FilePath -> S.Sh(T.Text)
+file2jumanLine filepath = S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["cat ", T.pack filepath, " | nkf -w -Lu | jumanpp"]
 
 text2jumanData :: T.Text -> S.Sh([JumanData])
 text2jumanData text = do
-  jumanLines <- S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["echo ", cleanse text, " | jumanpp "]
+  jumanLines <- text2jumanLine text
   return $ map jumanParser $ filter (/= T.empty) $ T.lines jumanLines
 
+file2jumanData :: FilePath -> S.Sh([JumanData])
+file2jumanData filepath = do
+  jumanLines <- file2jumanLine filepath
+  return $ map jumanParser $ filter (/= T.empty) $ T.lines jumanLines
 
 -- | Juman分析行のためのデータ形式。
 -- | 入力形態素 読み 原型 品詞 品詞ID 品詞細分類 細分類ID 活用型 活用型ID 活用形 活用形ID その他の情報
