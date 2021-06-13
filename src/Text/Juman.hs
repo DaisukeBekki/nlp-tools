@@ -5,6 +5,8 @@ module Text.Juman (
   ,file2jumanLine
   ,text2jumanData
   ,file2jumanData
+  ,text2jumanData'
+  ,file2jumanData'
   ,fromText
   ,fromFile
   ,jumanParser
@@ -72,6 +74,12 @@ file2jumanData :: FilePath -> S.Sh([JumanData])
 file2jumanData filepath = do
   jumanLines <- file2jumanLine filepath
   return $ map jumanParser $ filter (/= T.empty) $ T.lines jumanLines
+
+text2jumanData' :: T.Text -> IO([JumanData])
+text2jumanData' = S.shelly . text2jumanData
+
+file2jumanData' :: FilePath -> S.Sh([JumanData])
+file2jumanData' = S.shelly . file2jumanData
 
 -- | Juman分析行のためのデータ形式。
 -- | 入力形態素 読み 原型 品詞 品詞ID 品詞細分類 細分類ID 活用型 活用型ID 活用形 活用形ID その他の情報
