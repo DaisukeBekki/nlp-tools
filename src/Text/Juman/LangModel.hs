@@ -7,6 +7,10 @@
 module Text.Juman.LangModel (
   processTextsByJuman,
 --  processTextByJumanOnline,
+  BaseForm(..),
+  POS(..),
+  WordInfo(..),
+  jumanData2Tuple,
   buildDictionary,
 --  cutLessFreqWords
   DictionaryData(..),
