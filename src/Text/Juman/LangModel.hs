@@ -71,24 +71,27 @@ isContent jumanData = case jumanData of
   EOS     -> True
   Err _ _ -> False
 
+type SurfaceForm = T.Text
 type BaseForm = T.Text
 type POS = T.Text
-type WordInfo = (BaseForm,POS)
+type WordInfo = (SurfaceForm,BaseForm,POS)
 
 printWordInfo :: WordInfo -> IO()
-printWordInfo (baseform,pos) = do
+printWordInfo (surfaceForm,baseForm,pos) = do
   putStr "("
-  T.putStr baseform
+  T.putStr surfaceForm
+  putStr ","
+  T.putStr baseForm
   putStr ","
   T.putStr pos
   putStrLn ")"
 
 jumanData2Tuple :: JumanData -> WordInfo
 jumanData2Tuple jumanData = case jumanData of
-  (JumanWord _ _ kihon hinsi _ _ _ _ _ _ _ _) -> (kihon, hinsi)
-  (AltWord _ _ _ _ _ _ _ _ _ _ _ _) -> ("ALT","ALT")
-  EOS     -> ("EOS","EOS")
-  Err _ _ -> ("ERR","ERR")
+  (JumanWord hyoso _ kihon hinsi _ _ _ _ _ _ _ _) -> (hyoso,kihon,hinsi)
+  (AltWord _ _ _ _ _ _ _ _ _ _ _ _) -> ("ALT","ALT","ALT")
+  EOS     -> ("EOS","EOS","EOS")
+  Err _ _ -> ("ERR","ERR","ERR")
 
 -- | Create a pair (or a tuple) of sorted labels from juman-processed texts
 --   ([k1,...,kn],[p1,...,pn])
@@ -98,7 +101,7 @@ buildDictionary :: [POS] -- ^ poss to use.  when posfilter==[], all poss are use
 buildDictionary posfilter jumanData =
   let tuples = map jumanData2Tuple $ filter isContent jumanData in
   unzip $ do                  -- list monad
-          (k,p)    <- tuples
+          (_,k,p)    <- tuples
           S.when (posfilter /= []) $ guard $ L.elem p posfilter  -- Only considers elements specified in posfilter
           return (k,p)        -- [(k1,p1),...,(kn,pn)]
 
