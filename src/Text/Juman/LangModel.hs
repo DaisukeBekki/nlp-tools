@@ -10,6 +10,8 @@ module Text.Juman.LangModel (
   BaseForm(..),
   POS(..),
   WordInfo(..),
+  printWordInfo,
+  isContent,
   jumanData2Tuple,
   buildDictionary,
 --  cutLessFreqWords
@@ -25,6 +27,7 @@ import System.Directory (doesFileExist,doesDirectoryExist) --base
 import qualified Data.List as L    --base
 import qualified GHC.Generics as G --base
 import qualified Data.Text as T    --text
+import qualified Data.Text.IO as T --text
 import qualified Shelly as S       --shelly
 import qualified Data.Aeson            as A --aeson
 import qualified Data.ByteString.Char8 as B --bytestring 
@@ -63,7 +66,7 @@ processTextsByJuman outputDirPath inputFilePaths = S.shelly $ do
 
 isContent :: JumanData -> Bool
 isContent jumanData = case jumanData of
-  (JumanWord _ _ kihon hinsi _ _ _ _ _ _ _ _) -> True
+  (JumanWord _ _ _ _ _ _ _ _ _ _ _ _) -> True
   (AltWord _ _ _ _ _ _ _ _ _ _ _ _) -> False
   EOS     -> True
   Err _ _ -> False
@@ -71,6 +74,14 @@ isContent jumanData = case jumanData of
 type BaseForm = T.Text
 type POS = T.Text
 type WordInfo = (BaseForm,POS)
+
+printWordInfo :: WordInfo -> IO()
+printWordInfo (baseform,pos) = do
+  putStr "("
+  T.putStr baseform
+  putStr ","
+  T.putStr pos
+  putStrLn ")"
 
 jumanData2Tuple :: JumanData -> WordInfo
 jumanData2Tuple jumanData = case jumanData of
