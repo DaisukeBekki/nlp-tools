@@ -29,7 +29,6 @@ library:
   default-extensions: OverloadedStrings
   exposed-modules:
   - Text.Juman
-  - Text.Juman.LangModel
   - Text.KNP
   - Text.Distiller
   - Text.Brat
