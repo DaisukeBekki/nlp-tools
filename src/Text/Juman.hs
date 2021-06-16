@@ -1,5 +1,5 @@
 module Text.Juman (
-  JumanData (..),
+  JumanData(..),
   callJuman
   ,text2jumanLine
   ,file2jumanLine

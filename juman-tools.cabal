@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 176edfc12bc7bcf417c69f7a87e4c821f99f63e544e12e3972581b55074a8044
+-- hash: f299b88cc85a0077988de132fea0d6193d3a537c30da9a72995f7441d748f657
 
 name:           juman-tools
-version:        0.1.5
+version:        0.1.6
 synopsis:       Haskell tools for Juman++ and KNP
 description:    Please see the README on GitHub at <https://github.com/DaisukeBekki/juman-tools#readme>
 homepage:       https://github.com/DaisukeBekki/juman-tools#readme

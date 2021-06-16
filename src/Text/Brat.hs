@@ -1,6 +1,7 @@
-{-# LANGUAGE ExtendedDefaultRules, DeriveGeneric, TypeApplications, ExplicitForAll, ScopedTypeVariables  #-}
+{-# LANGUAGE ExtendedDefaultRules, DeriveGeneric, TypeApplications, ExplicitForAll, ScopedTypeVariables, AllowAmbiguousTypes #-}
 
 module Text.Brat (
+  prepareBratData,
   readBratFile,
   BratLine(..),
   bratLine2Text,
@@ -23,7 +24,18 @@ import qualified Data.ByteString.Char8 as B --bytestring
 import qualified Data.Yaml             as Y --yaml
 import Text.Parsec      --parsec
 import Text.Parsec.Text --parsec
-import Text.Directory (checkFile) --juman-tools
+import Text.Directory (checkFile,checkDir,getFileList) --juman-tools
+
+-- | bratDirにある.annファイルをパーズし、bratSaveFileにBratData形式で保存する。
+prepareBratData :: forall lbl. (Eq lbl, Read lbl, A.ToJSON lbl) => Bool -> FilePath -> FilePath -> IO()
+prepareBratData showStat bratDir bratSaveFile = do
+  annList <- getFileList "ann" bratDir  -- | .annファイルのフルパスのリストを得る
+  bratData <- mapM (readBratFile @lbl) annList -- | .annファイルをすべてパーズして[BratData]を得る
+  when showStat $ putStrLn $ "Number of Brat files: " ++ (show $ length bratData)
+  let nonEmptyBrats = filter (\(BratData _ _ _ _ bl) -> bl /= []) bratData -- | アノテーションが空でないもののみ集める
+  when showStat $ putStrLn $ "Number of annotated Brat files: " ++ (show $ length nonEmptyBrats)
+  saveBratData bratSaveFile nonEmptyBrats
+  putStrLn $ "Brat data saved in: " ++ (show bratSaveFile)
 
 -- | directoryにあるfilename（.annファイル）を行ごとにパーズして[BratData]を得る。
 -- | ann_filenameはフルパス
