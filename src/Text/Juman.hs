@@ -37,7 +37,6 @@ fromText text = do
   jumanOutput <- S.shelly $ S.silently $ S.escaping False $ S.cmd $ S.fromText $ T.concat ["echo ", text, " | jumanpp "]
   return $ filter (/= T.empty) $ T.lines jumanOutput
 
-
 -- | Deprecated.  Use file2jumanLine instead.
 -- | ファイル内のテキストに対しJuman++を呼び出し、分析行のリストを返す。
 fromFile :: FilePath -> IO([T.Text])

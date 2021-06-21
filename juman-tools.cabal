@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f299b88cc85a0077988de132fea0d6193d3a537c30da9a72995f7441d748f657
+-- hash: ca64c2c8bcb0230064952ee2eef7a43718673a346191c0a9137078ededc63096
 
 name:           juman-tools
 version:        0.1.6
@@ -28,7 +28,6 @@ source-repository head
 library
   exposed-modules:
       Text.Juman
-      Text.Juman.LangModel
       Text.KNP
       Text.Distiller
       Text.Brat
