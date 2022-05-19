@@ -17,14 +17,14 @@ $ brew install haskell-stack
 ```
 See https://docs/haskellstack.org/en/stable/README/#how-to-install for details.
 
-Do the following in the directory under which you'd like to install juman-tools.
+Do the following in the directory under which you'd like to install nlp-tools.
 ```
-$ git clone https://github.com/DaisukeBekki/JSeM.git
+$ git clone https://github.com/DaisukeBekki/nlp-tools.git
 ```
-This operation will create the directory "JSeM" (henceforth we will refer to this directory as <jsem>) under the current directory.
+This operation will create the directory "nlp-tools" (henceforth we will refer to this directory as <nlp>) under the current directory.
 
 ```
-$ cd <jsem>
+$ cd <nlp>
 $ stack setup
 $ stack build
 ```
