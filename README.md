@@ -1,6 +1,6 @@
-# juman-tools: Haskell wrapper for JUMAN++/KNP
+# nlp-tools: Haskell wrapper for NLP tools
 
-A Haskell wrapper for JUMAN++(JUMAN) and KNP.
+A Haskell wrapper for NLP tools (eg. JUMAN++(JUMAN) and KNP).
 
 ## Requirements
 - [形態素解析機JUMAN++](http://nlp.ist.i.kyoto-u.ac.jp/index.php?JUMAN++)
