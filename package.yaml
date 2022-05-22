@@ -1,5 +1,5 @@
 name:                nlp-tools
-version:             0.1.6
+version:             0.1.7
 synopsis:            Haskell tools for NLP tools
 description:         Please see the README on GitHub at <https://github.com/DaisukeBekki/nlp-tools#readme>
 author:              Daisuke Bekki
@@ -39,14 +39,25 @@ executables:
     main:         calljuman.hs
     source-dirs:  app
     ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
-    dependencies: juman-tools >= 0.1.5
+    dependencies: nlp-tools >= 0.1.7
   callknp:
     main:         callknp.hs
     source-dirs:  app
     ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
-    dependencies: juman-tools >= 0.1.5
+    dependencies: nlp-tools >= 0.1.7
   prepareCorpus:
     main:         prepareCorpus.hs
     source-dirs:  app
     ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
-    dependencies: juman-tools >= 0.1.5
+    dependencies: nlp-tools >= 0.1.7
+  ioTest:
+    main:         Main.hs
+    source-dirs:  tutorial/io
+    ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
+    dependencies: nlp-tools >= 0.1.7
+  bratTest:
+    main:         Main.hs
+    source-dirs:  tutorial/brat
+    ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
+    dependencies: nlp-tools >= 0.1.7
+

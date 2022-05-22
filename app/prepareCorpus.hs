@@ -7,8 +7,8 @@ import Shelly (whenM)                --shelly
 import qualified System.Directory as D --directory
 import qualified Data.Text as T      --text
 import qualified Data.Text.IO as T   --text
-import Text.Distiller (collectText,canonicalize)  --juman-tools
-import Text.Juman (jumanLight)                   --juman-tools
+import Text.Distiller (collectText,canonicalize) --nlp-tools
+import Text.Juman (jumanLight)                   --nlp-tools
 
 main :: IO ()
 main = do

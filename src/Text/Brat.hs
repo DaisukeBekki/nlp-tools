@@ -1,22 +1,21 @@
-{-# LANGUAGE ExtendedDefaultRules, DeriveGeneric, TypeApplications, ExplicitForAll, ScopedTypeVariables, AllowAmbiguousTypes #-}
+{-# LANGUAGE ExtendedDefaultRules, DeriveGeneric #-}
 
 module Text.Brat (
-  prepareBratData,
-  readBratFile,
   BratLine(..),
   bratLine2Text,
   BratData(..),
   bratData2Text,
   saveBratData,
-  loadBratData
+  loadBratData,
+  prepareBratData,
+  readBratFile,
+  bratParser
   ) where
 
 import GHC.Generics --base
-import System.FilePath ((</>),dropExtensions,replaceExtensions) --filepath
-import System.FilePath.Posix (splitFileName) --filepath
+import System.FilePath (replaceExtensions) --filepath
 import Control.Monad (when)
-import Control.Exception (throw)   --base
-import Data.List (elemIndex)       --base
+--import Control.Exception (throw)   --base
 import qualified Data.Text    as T --text
 import qualified Data.Text.IO as T --text
 import qualified Data.Aeson            as A --aeson
@@ -24,127 +23,121 @@ import qualified Data.ByteString.Char8 as B --bytestring
 import qualified Data.Yaml             as Y --yaml
 import Text.Parsec      --parsec
 import Text.Parsec.Text --parsec
-import Text.Directory (checkFile,checkDir,getFileList) --juman-tools
-
--- | bratDirにある.annファイルをパーズし、bratSaveFileにBratData形式で保存する。
-prepareBratData :: forall lbl. (Eq lbl, Read lbl, A.ToJSON lbl) => Bool -> FilePath -> FilePath -> IO()
-prepareBratData showStat bratDir bratSaveFile = do
-  annList <- getFileList "ann" bratDir  -- | .annファイルのフルパスのリストを得る
-  bratData <- mapM (readBratFile @lbl) annList -- | .annファイルをすべてパーズして[BratData]を得る
-  when showStat $ putStrLn $ "Number of Brat files: " ++ (show $ length bratData)
-  let nonEmptyBrats = filter (\(BratData _ _ _ _ bl) -> bl /= []) bratData -- | アノテーションが空でないもののみ集める
-  when showStat $ putStrLn $ "Number of annotated Brat files: " ++ (show $ length nonEmptyBrats)
-  saveBratData bratSaveFile nonEmptyBrats
-  putStrLn $ "Brat data saved in: " ++ (show bratSaveFile)
-
--- | directoryにあるfilename（.annファイル）を行ごとにパーズして[BratData]を得る。
--- | ann_filenameはフルパス
-readBratFile :: forall a. (Read a) => FilePath -> IO(BratData a)
-readBratFile ann_filename = do
-  let (_,filename) = splitFileName ann_filename
-  brat <- T.readFile $ ann_filename
-  (first, second) <- file2ids filename
-  let bratLines = map bratParser $ T.lines brat
-      txt_filename = replaceExtensions ann_filename "txt"
-  txt <- T.readFile $ txt_filename
-  let txt2 = T.lines txt
-  when (not $ length txt2 == 2) $ throw (userError $ txt_filename ++ " is invalid.") 
-  return $ BratData first second (head txt2) (head $ tail txt2) bratLines
-
-file2ids :: FilePath -> IO (Int,Int)
-file2ids filename =
-  case elemIndex '_' filename of
-    Just i ->  do
-               let (first,second) = splitAt i $ dropExtensions filename
-               return (read first, read $ tail second)
-    Nothing -> throw (userError $ filename ++ " is an invalid filename.")
-
+import Text.Directory (checkFile,getFileList) --nlp-tools
 
 -- | bratの.annファイルの行のデータ形式
-data BratLine a = 
-  BratLine String a Int Int T.Text 
+data BratLine = 
+  Entity Int String Int Int T.Text
+  | Attr Int String Int
   | Err String T.Text
   deriving (Eq, Show, Read, Generic)
 
-instance (A.FromJSON a) => A.FromJSON (BratLine a)
-instance (A.ToJSON a) => A.ToJSON (BratLine a)
+instance A.FromJSON BratLine
+instance A.ToJSON BratLine
 
--- | (id1, id2, sentence, [annot_data])のリスト、を得たい。id1, id2は文書番号(Int)。
-data BratData a =
-  BratData Int Int T.Text T.Text [BratLine a]
+-- | bratの.annファイル、.txtファイルのペアに対するデータ形式
+data BratData =
+  BratData T.Text [BratLine]
   deriving (Eq, Show, Read, Generic)
 
-instance (A.FromJSON a) => A.FromJSON (BratData a)
-instance (A.ToJSON a) => A.ToJSON (BratData a)
+instance A.FromJSON BratData
+instance A.ToJSON BratData
 
-saveBratData :: forall a. (A.ToJSON a) => FilePath -> [BratData a] -> IO()
+saveBratData :: FilePath -> [BratData] -> IO()
 saveBratData = Y.encodeFile 
 
-loadBratData :: forall a. (A.FromJSON a) => FilePath -> IO([BratData a])
+loadBratData :: FilePath -> IO([BratData])
 loadBratData filepath = do
   checkFile filepath
   content <- B.readFile filepath
-  let parsedDic = Y.decodeEither' content :: Either Y.ParseException [BratData a]
-  case parsedDic of
+  let parsedBrat = Y.decodeEither' content :: Either Y.ParseException [BratData]
+  case parsedBrat of
     Left parse_exception -> error $ "Could not parse dic file " ++ filepath ++ ": " ++ (show parse_exception)
-    Right dic -> return dic
+    Right brats -> return brats
 
-bratLine2Text :: forall a. (Show a) => (BratLine a) -> T.Text
-bratLine2Text (BratLine str lbl from to txt) = T.concat [
-  "[",
-  (T.pack $ show @a lbl),
+bratLine2Text :: BratLine -> T.Text
+bratLine2Text (Entity idn lbl start end txt) = T.concat [
+  "T",
+  (T.pack $ show idn),
   " ",
-  (T.pack $ show from),
+  (T.pack $ show lbl),
+  " ",
+  (T.pack $ show start),
   "-",
-  (T.pack $ show to),
+  (T.pack $ show end),
   ":",
-  txt,
-  "]"
+  txt
+  ]
+bratLine2Text (Attr idn lbl arg) = T.concat [
+  "A",
+  (T.pack $ show idn),
+  " ",
+  (T.pack $ show lbl),
+  " ",
+  (T.pack $ show arg)
   ]
 bratLine2Text (Err _ _) = "[Error]"                                              
 
-bratData2Text :: forall a. (Show a) => (BratData a) -> T.Text
-bratData2Text (BratData first second txt1 txt2 bratLines) = T.concat $ [
-  "BratData ",
-  (T.pack $ show first),
-  "-",
-  (T.pack $ show second),
-  ":「",
-  txt1,
-  "」↔「",
-  txt2,
-  "」"
-  ]
-  ++ (map bratLine2Text bratLines) ++ ["\n"]
+bratData2Text :: BratData -> T.Text
+bratData2Text (BratData txt bratLines) = T.concat $ (txt : (map bratLine2Text bratLines))
 
--- | Brat Parser
+-- | bratDirにある.annファイルをパーズし、bratSaveFileにBratData形式で保存する。
+prepareBratData :: Bool -> FilePath -> FilePath -> IO()
+prepareBratData showStat bratDir bratSaveFile = do
+  annList <- getFileList "ann" bratDir   -- | .annファイルのフルパスのリストを得る
+  bratLines <- mapM readBratFile annList -- | .annファイルをすべてパーズして[BratData]を得る
+  when showStat $ putStrLn $ "Number of Brat files: " ++ (show $ length bratLines)
+  when showStat $ putStrLn $ "Number of annotated Brat files: " ++ (show $ length bratLines)
+  saveBratData bratSaveFile bratLines
+  putStrLn $ "Brat data saved in: " ++ (show bratSaveFile)
 
+-- | filename（.annファイル）を行ごとにパーズし、対応する.txtファイルの内容と合わせてBratDataを得る。
+-- | ann_filenameはフルパス
+readBratFile :: FilePath -> IO(BratData)
+readBratFile annFilePath = do
+  checkFile annFilePath
+  ann <- T.readFile annFilePath
+  let txtFilePath = replaceExtensions annFilePath "txt"
+  checkFile txtFilePath
+  txt <- T.readFile txtFilePath
+  return $ BratData txt (map bratParser $ T.lines ann)
+
+-- | Brat Parser: 
 -- | bratの.annファイルの行をパーズしてBratLineを得る
-bratParser :: forall a. (Read a) => T.Text -> (BratLine a)
-bratParser text = 
-  case parse bratLine "" text of
-    Left e -> Err (show e) text
+bratParser :: T.Text -> BratLine
+bratParser txt = 
+  case parse bratLine "" txt of
+    Left e -> Err (show e) txt
     Right t -> t
 
 -- | 以下、bratパーザを構成。
-bratLine :: forall a. (Read a) => Parser (BratLine a)
-bratLine = do
-  id <- str
-  char '\t'
-  lbl <- str
-  char ' '
-  start <- number
-  char ' '
-  end <- number
-  char '\t'
-  fragment <- str
-  return $ BratLine id (read @a lbl) start end (T.pack fragment)  
+bratLine :: Parser BratLine
+bratLine = entityParser <|> attrParser
 
--- | EOS行
---eos :: Parser BratLine
---eos = do
---  _ <- try (string "EOS")
---  return EOS
+entityParser :: Parser BratLine
+entityParser = do
+  _     <- char 'T'
+  idn   <- number
+  _     <- char '\t'
+  lbl   <- str
+  _     <- char ' '
+  start <- number
+  _     <- char ' '
+  end   <- number
+  _     <- char '\t'
+  fragment <- str
+  return $ Entity idn lbl start end (T.pack fragment)  
+
+attrParser :: Parser BratLine
+attrParser = do
+  _     <- char 'A'
+  idn   <- number
+  _     <- char '\t'
+  lbl   <- str
+  _     <- char ' '
+  _     <- char 'T'
+  arg   <- number
+  return $ Attr idn lbl arg
 
 -- | 空白でない文字列
 str :: Parser String
@@ -153,4 +146,10 @@ str = many1 $ noneOf " \t"
 -- | 数字
 number :: Parser Int
 number = read <$> (many1 digit)
+
+-- | EOS行
+--eos :: Parser BratLine
+--eos = do
+--  _ <- try (string "EOS")
+--  return EOS
 

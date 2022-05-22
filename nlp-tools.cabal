@@ -1,17 +1,17 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ca64c2c8bcb0230064952ee2eef7a43718673a346191c0a9137078ededc63096
+-- hash: 74b3247ad051dbf0adb394a6381672c29408d014ce54d08edaabc3a2122b1504
 
-name:           juman-tools
-version:        0.1.6
-synopsis:       Haskell tools for Juman++ and KNP
-description:    Please see the README on GitHub at <https://github.com/DaisukeBekki/juman-tools#readme>
-homepage:       https://github.com/DaisukeBekki/juman-tools#readme
-bug-reports:    https://github.com/DaisukeBekki/juman-tools/issues
+name:           nlp-tools
+version:        0.1.7
+synopsis:       Haskell tools for NLP tools
+description:    Please see the README on GitHub at <https://github.com/DaisukeBekki/nlp-tools#readme>
+homepage:       https://github.com/DaisukeBekki/nlp-tools#readme
+bug-reports:    https://github.com/DaisukeBekki/nlp-tools/issues
 author:         Daisuke Bekki
 maintainer:     bekki@is.ocha.ac.jp
 copyright:      Daisuke Bekki
@@ -23,7 +23,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/DaisukeBekki/juman-tools
+  location: https://github.com/DaisukeBekki/nlp-tools
 
 library
   exposed-modules:
@@ -34,7 +34,8 @@ library
       Text.Directory
   hs-source-dirs:
       src
-  default-extensions: OverloadedStrings
+  default-extensions:
+      OverloadedStrings
   ghc-options: -Wall
   build-depends:
       aeson >=1.0
@@ -50,10 +51,32 @@ library
     , yaml >=0.8.3
   default-language: Haskell2010
 
+executable bratTest
+  main-is: Main.hs
+  other-modules:
+      Paths_nlp_tools
+  hs-source-dirs:
+      tutorial/brat
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson >=1.0
+    , base >=4.9 && <5
+    , bytestring >=0.10
+    , directory >=1.2
+    , filepath >=1.4
+    , nlp-tools >=0.1.7
+    , parsec >=3.1
+    , process >=1.2
+    , shelly >=1.6
+    , text >=1.2
+    , vector >=0.12
+    , yaml >=0.8.3
+  default-language: Haskell2010
+
 executable calljuman
   main-is: calljuman.hs
   other-modules:
-      Paths_juman_tools
+      Paths_nlp_tools
   hs-source-dirs:
       app
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
@@ -63,7 +86,7 @@ executable calljuman
     , bytestring >=0.10
     , directory >=1.2
     , filepath >=1.4
-    , juman-tools >=0.1.5
+    , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
@@ -75,7 +98,7 @@ executable calljuman
 executable callknp
   main-is: callknp.hs
   other-modules:
-      Paths_juman_tools
+      Paths_nlp_tools
   hs-source-dirs:
       app
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
@@ -85,7 +108,29 @@ executable callknp
     , bytestring >=0.10
     , directory >=1.2
     , filepath >=1.4
-    , juman-tools >=0.1.5
+    , nlp-tools >=0.1.7
+    , parsec >=3.1
+    , process >=1.2
+    , shelly >=1.6
+    , text >=1.2
+    , vector >=0.12
+    , yaml >=0.8.3
+  default-language: Haskell2010
+
+executable ioTest
+  main-is: Main.hs
+  other-modules:
+      Paths_nlp_tools
+  hs-source-dirs:
+      tutorial/io
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson >=1.0
+    , base >=4.9 && <5
+    , bytestring >=0.10
+    , directory >=1.2
+    , filepath >=1.4
+    , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
@@ -97,7 +142,7 @@ executable callknp
 executable prepareCorpus
   main-is: prepareCorpus.hs
   other-modules:
-      Paths_juman_tools
+      Paths_nlp_tools
   hs-source-dirs:
       app
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
@@ -107,7 +152,7 @@ executable prepareCorpus
     , bytestring >=0.10
     , directory >=1.2
     , filepath >=1.4
-    , juman-tools >=0.1.5
+    , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6

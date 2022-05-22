@@ -1,0 +1,21 @@
+- - |
+    太郎が来て、紙をそこに置いて、と言った。
+  - - tag: Entity
+      contents:
+      - 1
+      - Keiki
+      - 4
+      - 5
+      - て
+    - tag: Entity
+      contents:
+      - 2
+      - Te
+      - 13
+      - 14
+      - て
+    - tag: Attr
+      contents:
+      - 1
+      - Hoge
+      - 1
