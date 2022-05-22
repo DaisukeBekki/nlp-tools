@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 74b3247ad051dbf0adb394a6381672c29408d014ce54d08edaabc3a2122b1504
+-- hash: 24983104faf111e7e219190fc070928a1948b570baa8de12908c4cbbc98350fb
 
 name:           nlp-tools
-version:        0.1.7
+version:        0.1.8
 synopsis:       Haskell tools for NLP tools
 description:    Please see the README on GitHub at <https://github.com/DaisukeBekki/nlp-tools#readme>
 homepage:       https://github.com/DaisukeBekki/nlp-tools#readme
@@ -27,11 +27,12 @@ source-repository head
 
 library
   exposed-modules:
+      Text.Directory
       Text.Juman
       Text.KNP
       Text.Distiller
       Text.Brat
-      Text.Directory
+      Text.PTB
   hs-source-dirs:
       src
   default-extensions:
@@ -141,6 +142,28 @@ executable ioTest
 
 executable prepareCorpus
   main-is: prepareCorpus.hs
+  other-modules:
+      Paths_nlp_tools
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson >=1.0
+    , base >=4.9 && <5
+    , bytestring >=0.10
+    , directory >=1.2
+    , filepath >=1.4
+    , nlp-tools >=0.1.7
+    , parsec >=3.1
+    , process >=1.2
+    , shelly >=1.6
+    , text >=1.2
+    , vector >=0.12
+    , yaml >=0.8.3
+  default-language: Haskell2010
+
+executable ptb
+  main-is: parsePTB.hs
   other-modules:
       Paths_nlp_tools
   hs-source-dirs:

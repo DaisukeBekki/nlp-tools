@@ -1,5 +1,5 @@
 name:                nlp-tools
-version:             0.1.7
+version:             0.1.8
 synopsis:            Haskell tools for NLP tools
 description:         Please see the README on GitHub at <https://github.com/DaisukeBekki/nlp-tools#readme>
 author:              Daisuke Bekki
@@ -28,11 +28,12 @@ library:
   source-dirs: src
   default-extensions: OverloadedStrings
   exposed-modules:
+  - Text.Directory
   - Text.Juman
   - Text.KNP
   - Text.Distiller
   - Text.Brat
-  - Text.Directory
+  - Text.PTB
   other-modules: []
 executables:
   calljuman:
@@ -47,6 +48,11 @@ executables:
     dependencies: nlp-tools >= 0.1.7
   prepareCorpus:
     main:         prepareCorpus.hs
+    source-dirs:  app
+    ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
+    dependencies: nlp-tools >= 0.1.7
+  ptb:
+    main:         parsePTB.hs
     source-dirs:  app
     ghc-options:  [-threaded, -rtsopts, -with-rtsopts=-N]
     dependencies: nlp-tools >= 0.1.7
