@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Text.PTB (
-  ptbParser
+  parsePTBtext,
+  parsePTBfile,
+  isErr
   ) where
 
 import GHC.Generics --base
@@ -29,9 +31,15 @@ ptbTree2Text (Word word) = word
 ptbTree2Tex (Phrase labl dtrs) = T.concat []
 -}
 
+isErr :: PTBTree -> Bool
+isErr ptb = case ptb of
+  Word _ -> False
+  Phrase _ _ -> False
+  Err _ _ -> True
+
 -- | PTB (parsed)のためのパーザ
-ptbParser :: T.Text -> [PTBTree]
-ptbParser mrg =
+parsePTBtext :: T.Text -> [PTBTree]
+parsePTBtext mrg =
   case parse ptbTreesParser "" mrg of
     Left err -> [Err (show err) mrg]
     Right trees -> trees
@@ -58,9 +66,9 @@ ptbTreesParser = do
 ptbTreeParser :: Parser PTBTree
 ptbTreeParser = do
   _ <- char '('
-  _ <- blank
+  _ <- optional blank
   tree <- (phraseParser <|> wordParser)
-  _ <- string ")" <|> string " )"
+  _ <- char ')' <|> (blank >> char ')')
   return tree
 
 wordParser :: Parser PTBTree
@@ -75,7 +83,7 @@ phraseParser = do
   syncat <- str
   _ <- blank
   ptbs <- sepBy1' (phraseParser <|> wordParser) blank
-  _ <- string ")" <|> string " )"
+  _ <- char ')' <|> (blank >> char ')')
   return $ Phrase syncat ptbs
 
 sepBy1' :: (Stream s m t) => ParsecT s u m a -> ParsecT s u m sep -> ParsecT s u m [a]
@@ -84,3 +92,11 @@ sepBy1' p sep = do
   x <- p
   xs <- many $ try (sep >> p)
   return $ x:xs
+
+parsePTBfile :: FilePath -> IO [PTBTree]
+parsePTBfile ptbFilePath = do
+  checkFile ptbFilePath
+  ptb <- T.readFile ptbFilePath
+  return $ parsePTBtext ptb
+
+
