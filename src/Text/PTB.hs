@@ -58,6 +58,7 @@ number = read <$> (many1 digit)
 
 ptbTreesParser :: Parser [PTBTree]
 ptbTreesParser = do
+  _ <- many commentParser
   _ <- optional blank
   trees <- sepBy1' ptbTreeParser blank
   return trees
@@ -85,6 +86,13 @@ phraseParser = do
   ptbs <- sepBy1' (phraseParser <|> wordParser) blank
   _ <- char ')' <|> (blank >> char ')')
   return $ Phrase syncat ptbs
+
+commentParser :: Parser ()
+commentParser = do
+  _ <- string "*x"
+  _ <- many $ noneOf "\n"
+  _ <- char '\n'
+  return ()
 
 sepBy1' :: (Stream s m t) => ParsecT s u m a -> ParsecT s u m sep -> ParsecT s u m [a]
 {-# INLINABLE sepBy1' #-}
