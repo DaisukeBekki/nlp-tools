@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: da78d1fb0ea015868e3bc002adfe35be9fdb9a258dc75dbd0d8f29f747b69e3c
+-- hash: 24983104faf111e7e219190fc070928a1948b570baa8de12908c4cbbc98350fb
 
 name:           nlp-tools
 version:        0.1.8
@@ -33,7 +33,6 @@ library
       Text.Distiller
       Text.Brat
       Text.PTB
-      Text.PTB.RNNG
   hs-source-dirs:
       src
   default-extensions:

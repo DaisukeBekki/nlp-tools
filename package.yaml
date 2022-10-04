@@ -34,7 +34,6 @@ library:
   - Text.Distiller
   - Text.Brat
   - Text.PTB
-  - Text.PTB.RNNG
   other-modules: []
 executables:
   calljuman:
