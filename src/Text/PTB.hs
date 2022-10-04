@@ -1,12 +1,16 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Text.PTB (
+  PTBTree(..),
+  ptbTree2sentence,
   parsePTBtext,
-  parsePTBfile,
+  parsePTBfromFile,
+  parsePTBfromDirectory,
   isErr
   ) where
 
 import GHC.Generics --base
+import System.FilePath.Posix (takeBaseName) --filepath
 import qualified Data.Text    as T --text
 import qualified Data.Text.IO as T --text
 import qualified Data.Aeson            as A --aeson
@@ -14,10 +18,10 @@ import qualified Data.ByteString.Char8 as B --bytestring
 import qualified Data.Yaml             as Y --yaml
 import Text.Parsec      --parsec
 import Text.Parsec.Text --parsec
-import Text.Directory (checkFile,getFileList) --nlp-tools
+import Text.Directory (checkFile,checkDir,getFileList) --nlp-tools
 
 data PTBTree =
-  Word String
+  Word T.Text T.Text -- surface form and POS
   | Phrase String [PTBTree]
   | Err String T.Text
   deriving (Eq, Show, Read, Generic)
@@ -25,15 +29,14 @@ data PTBTree =
 instance A.FromJSON PTBTree
 instance A.ToJSON PTBTree
 
-{-
-ptbTree2Text :: PTBTree -> String
-ptbTree2Text (Word word) = word
-ptbTree2Tex (Phrase labl dtrs) = T.concat []
--}
+ptbTree2sentence :: PTBTree -> T.Text
+ptbTree2sentence (Word word _) = word
+ptbTree2sentence (Phrase labl dtrs) = T.intercalate " " $ map ptbTree2sentence dtrs
+ptbTree2sentence (Err _ text) = T.concat ["(Err ", text, ")"]
 
 isErr :: PTBTree -> Bool
 isErr ptb = case ptb of
-  Word _ -> False
+  Word _ _ -> False
   Phrase _ _ -> False
   Err _ _ -> True
 
@@ -50,7 +53,7 @@ blank = many1 $ oneOf " \t\n"
 
 -- | 空白や括弧でない文字列
 str :: Parser String
-str = many1 $ noneOf " \t\n()"
+str = many1 $ noneOf " \t\n()/"
 
 -- | 数字
 number :: Parser Int
@@ -75,7 +78,9 @@ ptbTreeParser = do
 wordParser :: Parser PTBTree
 wordParser = do
   word <- str
-  return $ Word word
+  _ <- char '/'
+  pos <- str
+  return $ Word (T.pack word) (T.pack pos)
   
 -- | 
 phraseParser :: Parser PTBTree
@@ -101,10 +106,17 @@ sepBy1' p sep = do
   xs <- many $ try (sep >> p)
   return $ x:xs
 
-parsePTBfile :: FilePath -> IO [PTBTree]
-parsePTBfile ptbFilePath = do
+-- | PTBパーザ
+parsePTBfromFile :: FilePath -> IO [PTBTree]
+parsePTBfromFile ptbFilePath = do
   checkFile ptbFilePath
   ptb <- T.readFile ptbFilePath
   return $ parsePTBtext ptb
 
+parsePTBfromDirectory :: FilePath -> String -> IO [PTBTree]
+parsePTBfromDirectory ptbDirectoryPath ext = do
+  checkDir ptbDirectoryPath
+  filePaths <- getFileList ext ptbDirectoryPath
+  ptbss <- mapM parsePTBfromFile $ filter (\f -> takeBaseName f /= "readme") filePaths
+  return $ concat ptbss
 

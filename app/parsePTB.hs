@@ -1,20 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import System.IO (hPutStrLn,stderr)  --base
-import System.FilePath ((</>))       --filepath
-import System.FilePath.Posix (takeBaseName) --filepath
-import qualified System.Directory as D --directory
 import qualified Data.Text as T      --text
 import qualified Data.Text.IO as T   --text
-import Text.Directory (checkFile,getFileList) --nlp-tools
-import Text.PTB (parsePTBfile,isErr)   --nlp-tools
+import Text.PTB (parsePTBfromDirectory,ptbTree2sentence) --nlp-tools
 
 main :: IO ()
 main = do
-  filePaths <- getFileList "mrg" "/home/bekki/dropbox/Public/Data/PennTreebank/treebank_3/"
-  ptbss <- mapM parsePTBfile $ filter (\f -> takeBaseName f /= "readme") filePaths
-  let ptbs = concat ptbss
-  mapM_ (putStrLn . show) $ filter isErr $ ptbs
-  hPutStrLn stderr $ (show (length ptbs)) ++ " mrg files processed." 
+  --ptbs < parsePTBfromDirectory "/home/bekki/dropbox/Public/Data/ABCbank/treebank" "psd"
+  ptbs <- parsePTBfromDirectory "/home/bekki/dropbox/Public/Data/PennTreebank/treebank_3/" "mrg"
+  let sample = take 1 $ drop 2 ptbs
+  mapM_ (putStrLn . show) sample
+  T.putStrLn $ ptbTree2sentence $ head sample
+  --hPutStrLn stderr $ (show (length ptbs)) ++ " files processed." 
 
   
