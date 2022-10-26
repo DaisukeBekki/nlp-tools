@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 24983104faf111e7e219190fc070928a1948b570baa8de12908c4cbbc98350fb
+-- hash: b128636d00c3398e110db702d9713a48aee61f22e838aa7d051240288129a98f
 
 name:           nlp-tools
-version:        0.1.8
+version:        0.1.9
 synopsis:       Haskell tools for NLP tools
 description:    Please see the README on GitHub at <https://github.com/DaisukeBekki/nlp-tools#readme>
 homepage:       https://github.com/DaisukeBekki/nlp-tools#readme
@@ -33,6 +33,12 @@ library
       Text.Distiller
       Text.Brat
       Text.PTB
+      ML.Util.Directory
+      ML.Util.TSV
+      ML.Util.Dict
+      ML.Util.Experiment
+      ML.Exp.Classification
+      ML.Exp.Chart
   hs-source-dirs:
       src
   default-extensions:
@@ -42,11 +48,14 @@ library
       aeson >=1.0
     , base >=4.9 && <5
     , bytestring >=0.10
+    , containers >=0.6
     , directory >=1.2
     , filepath >=1.4
+    , gnuplot >=0.5.5
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
+    , split >=0.2
     , text >=1.2
     , vector >=0.12
     , yaml >=0.8.3
@@ -63,12 +72,15 @@ executable bratTest
       aeson >=1.0
     , base >=4.9 && <5
     , bytestring >=0.10
+    , containers >=0.6
     , directory >=1.2
     , filepath >=1.4
+    , gnuplot >=0.5.5
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
+    , split >=0.2
     , text >=1.2
     , vector >=0.12
     , yaml >=0.8.3
@@ -85,12 +97,15 @@ executable calljuman
       aeson >=1.0
     , base >=4.9 && <5
     , bytestring >=0.10
+    , containers >=0.6
     , directory >=1.2
     , filepath >=1.4
+    , gnuplot >=0.5.5
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
+    , split >=0.2
     , text >=1.2
     , vector >=0.12
     , yaml >=0.8.3
@@ -107,12 +122,15 @@ executable callknp
       aeson >=1.0
     , base >=4.9 && <5
     , bytestring >=0.10
+    , containers >=0.6
     , directory >=1.2
     , filepath >=1.4
+    , gnuplot >=0.5.5
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
+    , split >=0.2
     , text >=1.2
     , vector >=0.12
     , yaml >=0.8.3
@@ -129,12 +147,15 @@ executable ioTest
       aeson >=1.0
     , base >=4.9 && <5
     , bytestring >=0.10
+    , containers >=0.6
     , directory >=1.2
     , filepath >=1.4
+    , gnuplot >=0.5.5
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
+    , split >=0.2
     , text >=1.2
     , vector >=0.12
     , yaml >=0.8.3
@@ -151,12 +172,15 @@ executable prepareCorpus
       aeson >=1.0
     , base >=4.9 && <5
     , bytestring >=0.10
+    , containers >=0.6
     , directory >=1.2
     , filepath >=1.4
+    , gnuplot >=0.5.5
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
+    , split >=0.2
     , text >=1.2
     , vector >=0.12
     , yaml >=0.8.3
@@ -173,12 +197,15 @@ executable ptb
       aeson >=1.0
     , base >=4.9 && <5
     , bytestring >=0.10
+    , containers >=0.6
     , directory >=1.2
     , filepath >=1.4
+    , gnuplot >=0.5.5
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
+    , split >=0.2
     , text >=1.2
     , vector >=0.12
     , yaml >=0.8.3

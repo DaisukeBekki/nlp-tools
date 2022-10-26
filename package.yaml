@@ -1,5 +1,5 @@
 name:                nlp-tools
-version:             0.1.8
+version:             0.1.9
 synopsis:            Haskell tools for NLP tools
 description:         Please see the README on GitHub at <https://github.com/DaisukeBekki/nlp-tools#readme>
 author:              Daisuke Bekki
@@ -19,10 +19,13 @@ dependencies:
   - shelly >= 1.6
   - filepath >= 1.4
   - directory >= 1.2
+  - containers >= 0.6
+  - split >= 0.2
   - vector >= 0.12
   - aeson >= 1.0
   - bytestring >= 0.10
   - yaml >= 0.8.3
+  - gnuplot >=0.5.5
 
 library:
   source-dirs: src
@@ -34,6 +37,12 @@ library:
   - Text.Distiller
   - Text.Brat
   - Text.PTB
+  - ML.Util.Directory
+  - ML.Util.TSV
+  - ML.Util.Dict
+  - ML.Util.Experiment
+  - ML.Exp.Classification
+  - ML.Exp.Chart
   other-modules: []
 executables:
   calljuman:
