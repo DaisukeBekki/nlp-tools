@@ -37,7 +37,7 @@ instance Show ClassificationReport where
 
 -- | 表示する際のラベル名の表示文字数
 labelLength :: Int
-labelLength = 5
+labelLength = 10
 
 -- | ラベルの型はBounded (Prelude)であると仮定
 -- 例：data Fruit = Orange | Apple | Grape deriving (Eq,Show,Bounded)
@@ -149,8 +149,8 @@ pairListToList :: [(a,a)] -> [a]
 pairListToList [] = []
 pairListToList ((x, y):rest) = x:y:(pairListToList rest)
 
-showConfusionMatrix :: (Show label, Eq label) => [(label,label)] -> T.Text
-showConfusionMatrix results =
+showConfusionMatrix :: (Show label, Eq label) => Int -> [(label,label)] -> T.Text
+showConfusionMatrix labelLength results =
   let labels = nub $ pairListToList results
   in T.concat [
     "|\t",
@@ -173,8 +173,8 @@ showConfusionMatrix results =
        ]
      ]
 
-showClassificationReport :: (Show label, Eq label, Enum label) => [(label,label)] -> T.Text
-showClassificationReport results = 
+showClassificationReport :: (Show label, Eq label) => Int -> [(label,label)] -> T.Text
+showClassificationReport labelLength results = 
   --let dat = zip predictions answers
   let labels = nub $ pairListToList results
       counts = map (flip classificationCountsFor results) labels  -- ::[ClassificationCounts]
@@ -217,7 +217,7 @@ stdDev xs = sqrt $ variance xs
 data Animal = Cat | Fish | Hen deriving (Eq, Show)
 
 main :: IO()
-main = T.putStrLn $ showClassificationReport [
+main = T.putStrLn $ showClassificationReport 3 [
          (Cat,Cat),(Cat,Cat),(Cat,Cat),(Cat,Cat),
          (Fish,Cat),
          (Hen,Cat),
