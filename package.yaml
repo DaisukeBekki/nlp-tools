@@ -42,6 +42,7 @@ library:
   - ML.Util.Dict
   - ML.Util.Experiment
   - ML.Exp.Classification
+  - ML.Exp.Classification.Bounded
   - ML.Exp.Chart
   other-modules: []
 executables:
