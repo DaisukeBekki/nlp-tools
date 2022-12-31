@@ -13,7 +13,7 @@ module ML.Exp.Classification (
   main
   ) where
 
-import Data.List (foldl')          --base
+import Data.List (foldl', nub)     --base
 import Text.Printf (printf)        --base
 import qualified Data.Text as T    --text
 import qualified Data.Text.IO as T --text
@@ -43,7 +43,7 @@ labelLength = 5
 -- 例：data Fruit = Orange | Apple | Grape deriving (Eq,Show,Bounded)
 --     [minBound..maxBound::Fruit]で[Orange,Apple,Grape]を作れる
 
-classificationCountsFor :: (Show label, Eq label, Enum label, Bounded label) => label -> [(label,label)] -> ClassificationCounts
+classificationCountsFor :: (Show label, Eq label) => label -> [(label,label)] -> ClassificationCounts
 classificationCountsFor pivot =
   foldl' (\(tp,fp,fn,tn) (prediction,answer) ->
                                if | (prediction == pivot) && (answer == pivot) -> (tp+1,fp,fn,tn)
@@ -145,9 +145,13 @@ calc_f1 precision recall =
 for :: [a] -> (a -> b) -> [b]
 for = flip map
 
-showConfusionMatrix :: (Show label, Eq label, Enum label, Bounded label) => [(label,label)] -> T.Text
+pairListToList :: [(a,a)] -> [a]
+pairListToList [] = []
+pairListToList ((x, y):rest) = x:y:(pairListToList rest)
+
+showConfusionMatrix :: (Show label, Eq label) => [(label,label)] -> T.Text
 showConfusionMatrix results =
-  let labels = [minBound..maxBound]
+  let labels = nub $ pairListToList results
   in T.concat [
     "|\t",
     T.concat $ for labels $ \answer -> T.concat [
@@ -169,10 +173,10 @@ showConfusionMatrix results =
        ]
      ]
 
-showClassificationReport :: (Show label, Eq label, Enum label, Bounded label) => [(label,label)] -> T.Text
+showClassificationReport :: (Show label, Eq label, Enum label) => [(label,label)] -> T.Text
 showClassificationReport results = 
   --let dat = zip predictions answers
-  let labels = [minBound..maxBound]
+  let labels = nub $ pairListToList results
       counts = map (flip classificationCountsFor results) labels  -- ::[ClassificationCounts]
       reports = map count2report $ zip (map (T.pack . show) labels) counts
   in T.unlines [
@@ -210,7 +214,7 @@ stdDev xs = sqrt $ variance xs
 
 --test code
 
-data Animal = Cat | Fish | Hen deriving (Eq, Show, Enum, Bounded)
+data Animal = Cat | Fish | Hen deriving (Eq, Show)
 
 main :: IO()
 main = T.putStrLn $ showClassificationReport [
