@@ -188,7 +188,7 @@ showClassificationReport labelLength results =
     formatReport $ weighted reports,
     "",
     "Confusion matrix: ",
-    showConfusionMatrix results
+    showConfusionMatrix labelLength results
     ]
   where
     formatReport :: ClassificationReport -> T.Text
