@@ -157,7 +157,7 @@ eid = do
 
 caseFrames :: Parser [(T.Text, T.Text, Int)]
 caseFrames = do
-  try $ string "<項構造："
+  try $ string "<項構造:"
   frames <- caseFrame `sepBy1` (char ';')
   char '>'
   return frames
