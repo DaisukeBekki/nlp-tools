@@ -26,6 +26,7 @@ dependencies:
   - bytestring >= 0.10
   - yaml >= 0.8.3
   - gnuplot >=0.5.5
+  - matplotlib
 
 library:
   source-dirs: src
