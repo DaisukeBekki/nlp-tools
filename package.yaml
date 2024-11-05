@@ -1,5 +1,5 @@
 name:                nlp-tools
-version:             0.1.9
+version:             0.2.0
 synopsis:            Haskell tools for NLP tools
 description:         Please see the README on GitHub at <https://github.com/DaisukeBekki/nlp-tools#readme>
 author:              Daisuke Bekki

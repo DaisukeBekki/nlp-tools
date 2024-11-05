@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b128636d00c3398e110db702d9713a48aee61f22e838aa7d051240288129a98f
+-- hash: 4208649db206ea51c5c9e74f0fa4b68c812f1b5df1f4bb2bcf773fe8421ed891
 
 name:           nlp-tools
-version:        0.1.9
+version:        0.2.0
 synopsis:       Haskell tools for NLP tools
 description:    Please see the README on GitHub at <https://github.com/DaisukeBekki/nlp-tools#readme>
 homepage:       https://github.com/DaisukeBekki/nlp-tools#readme
@@ -38,6 +38,7 @@ library
       ML.Util.Dict
       ML.Util.Experiment
       ML.Exp.Classification
+      ML.Exp.Classification.Bounded
       ML.Exp.Chart
   hs-source-dirs:
       src
@@ -52,6 +53,7 @@ library
     , directory >=1.2
     , filepath >=1.4
     , gnuplot >=0.5.5
+    , matplotlib
     , parsec >=3.1
     , process >=1.2
     , shelly >=1.6
@@ -76,6 +78,7 @@ executable bratTest
     , directory >=1.2
     , filepath >=1.4
     , gnuplot >=0.5.5
+    , matplotlib
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
@@ -101,6 +104,7 @@ executable calljuman
     , directory >=1.2
     , filepath >=1.4
     , gnuplot >=0.5.5
+    , matplotlib
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
@@ -126,6 +130,7 @@ executable callknp
     , directory >=1.2
     , filepath >=1.4
     , gnuplot >=0.5.5
+    , matplotlib
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
@@ -151,6 +156,7 @@ executable ioTest
     , directory >=1.2
     , filepath >=1.4
     , gnuplot >=0.5.5
+    , matplotlib
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
@@ -176,6 +182,7 @@ executable prepareCorpus
     , directory >=1.2
     , filepath >=1.4
     , gnuplot >=0.5.5
+    , matplotlib
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
@@ -201,6 +208,7 @@ executable ptb
     , directory >=1.2
     , filepath >=1.4
     , gnuplot >=0.5.5
+    , matplotlib
     , nlp-tools >=0.1.7
     , parsec >=3.1
     , process >=1.2
