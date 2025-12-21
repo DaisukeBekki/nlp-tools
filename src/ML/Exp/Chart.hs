@@ -43,7 +43,7 @@ pairListToList ((x, y):rest) = x:y:(pairListToList rest)
 drawConfusionMatrix :: (Show label, Eq label) => 
   FilePath           -- ^ The filepath for the PNG file
   -> Int             -- ^ The number of classes
-  -> [(label,label)] -- ^ The list of data (prediction, excpected)
+  -> [(label,label)] -- ^ The list of data (prediction, expected)
   -> IO()
 drawConfusionMatrix filePath labelLength results = do
   let labels = nub $ pairListToList results
@@ -61,7 +61,7 @@ drawConfusionMatrix filePath labelLength results = do
               title "Confusion Matrix"
               % setSizeInches (newSizeX :: Int) (newSizeY :: Int)
               % xlabel "Actual" 
-              % ylabel "Expected" 
+              % ylabel "Predicted" 
               % colorbar 
               % mp # ("ax.invert_yaxis()" :: String)) labelsText) valuesText
   _ <- file filePath graph
