@@ -5,7 +5,9 @@
 module ML.Exp.Classification (
   ClassificationCounts,
   ClassificationReport(..),
-  showClassificationReport,
+  Mode(..),
+  showClassificationReport, 
+  showClassificationReport',
   showConfusionMatrix,
   average,
   variance,
@@ -150,56 +152,83 @@ pairListToList [] = []
 pairListToList ((x, y):rest) = x:y:(pairListToList rest)
 
 showConfusionMatrix :: (Show label, Eq label) => Int -> [(label,label)] -> T.Text
-showConfusionMatrix labelLength results =
+showConfusionMatrix = showConfusionMatrix' TEXT
+
+showConfusionMatrix' :: (Show label, Eq label) => Mode -> Int -> [(label,label)] -> T.Text
+showConfusionMatrix' mode labelLength results =
   let labels = nub $ pairListToList results
   in T.concat [
-    "|\t",
+    leftDelim mode,
+    centerDelim mode,
     T.concat $ for labels $ \answer -> T.concat [
-       "| ",
+       leftDelim mode,
        T.pack $ take labelLength $ show $ answer,
-       "\t"
+       centerDelim mode
        ],
-    "|\n",
+    leftDelim mode,
+    "\n",
     T.unlines $ for labels $ \prediction -> T.concat [
-       "| ",
+       leftDelim mode,
        T.pack $ take labelLength $ show $ prediction,
-       "\t",
+       centerDelim mode,
        T.concat $ for labels $ \answer -> T.concat [
-           "| ",
+           leftDelim mode,
            T.pack $ show $ length $ filter (\(p,a) -> p==prediction && a==answer) results,
-           "\t"
+           centerDelim mode
            ],
-       "|"
+       leftDelim mode
        ]
      ]
 
+data Mode = TEXT | TEX deriving (Eq, Show)
+
 showClassificationReport :: (Show label, Eq label) => Int -> [(label,label)] -> T.Text
-showClassificationReport labelLength results = 
+showClassificationReport = showClassificationReport' TEXT
+
+leftDelim :: Mode -> T.Text
+leftDelim TEXT = "|"
+leftDelim TEX = ""
+
+centerDelim :: Mode -> T.Text
+centerDelim TEXT = "\t|"
+centerDelim TEX = "&"
+
+showClassificationReport' :: (Show label, Eq label) => Mode -> Int -> [(label,label)] -> T.Text
+showClassificationReport' mode labelLength results = 
   --let dat = zip predictions answers
   let labels = nub $ pairListToList results
       counts = map (flip classificationCountsFor results) labels  -- ::[ClassificationCounts]
       reports = map count2report $ zip (map (T.pack . show) labels) counts
   in T.unlines [
     "Scores:",
-    "|\t| Prec \t| Rec \t| F1 \t| Supp \t|",
-    T.unlines $ for reports formatReport,
-    formatReport $ micro counts,
-    formatReport $ macro labels counts,
-    formatReport $ weighted reports,
+    leftDelim mode,
+    centerDelim mode,
+    " Prec ",
+    centerDelim mode,
+    " Rec ",
+    centerDelim mode,
+    " F1 ",
+    centerDelim mode,
+    " Supp ",
+    centerDelim mode,
+    T.unlines $ for reports $ formatReport mode,
+    formatReport mode $ micro counts,
+    formatReport mode $ macro labels counts,
+    formatReport mode $ weighted reports,
     "",
     "Confusion matrix: ",
-    showConfusionMatrix labelLength results
+    showConfusionMatrix' mode labelLength results
     ]
   where
-    formatReport :: ClassificationReport -> T.Text
-    formatReport repo = T.concat [
-      "| ",
+    formatReport :: Mode -> ClassificationReport -> T.Text
+    formatReport mode repo = T.concat [
+      leftDelim mode,
       T.take labelLength $ title repo,
-      "\t| ",
-      T.intercalate "\t| " $ map (\action -> T.pack $ printf "%3.3f" $ action repo) [precision, recall, f1],
-      "\t| ",
+      centerDelim mode,
+      T.intercalate (centerDelim mode) $ map (\action -> T.pack $ printf "%3.3f" $ action repo) [precision, recall, f1],
+      centerDelim mode,
       T.pack $ show $ support repo,
-      "\t|"
+      centerDelim mode
       ]
 
 average :: (Real a) => [a] -> Double
