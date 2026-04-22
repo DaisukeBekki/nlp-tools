@@ -151,6 +151,23 @@ pairListToList :: [(a,a)] -> [a]
 pairListToList [] = []
 pairListToList ((x, y):rest) = x:y:(pairListToList rest)
 
+data Mode = TEXT | TEX deriving (Eq, Show)
+
+showClassificationReport :: (Show label, Eq label) => Int -> [(label,label)] -> T.Text
+showClassificationReport = showClassificationReport' TEXT
+
+delimOf :: Mode -> T.Text
+delimOf TEXT = "|"
+delimOf TEX = ""
+
+tabOf :: Mode -> T.Text
+tabOf TEXT = "\t"
+tabOf TEX = " & "
+
+crOf :: Mode -> T.Text
+crOf TEXT = " \n"
+crOf TEX = "  \\\\\n"
+
 showConfusionMatrix :: (Show label, Eq label) => Int -> [(label,label)] -> T.Text
 showConfusionMatrix = showConfusionMatrix' TEXT
 
@@ -158,40 +175,37 @@ showConfusionMatrix' :: (Show label, Eq label) => Mode -> Int -> [(label,label)]
 showConfusionMatrix' mode labelLength results =
   let labels = nub $ pairListToList results
   in T.concat [
-    leftDelim mode,
-    centerDelim mode,
+    case mode of
+        TEXT -> ""
+        TEX -> "\\begin{tabular}{lrrrr}\n",
+    delimOf mode,
+    tabOf mode,
     T.concat $ for labels $ \answer -> T.concat [
-       leftDelim mode,
+       delimOf mode,
        T.pack $ take labelLength $ show $ answer,
-       centerDelim mode
+       tabOf mode
        ],
-    leftDelim mode,
-    "\n",
-    T.unlines $ for labels $ \prediction -> T.concat [
-       leftDelim mode,
+    delimOf mode,
+    crOf mode,
+    case mode of
+      TEXT -> ""
+      TEX -> "\\hline\n",
+    T.concat $ for labels $ \prediction -> T.concat [
+       delimOf mode,
        T.pack $ take labelLength $ show $ prediction,
-       centerDelim mode,
+       tabOf mode,
        T.concat $ for labels $ \answer -> T.concat [
-           leftDelim mode,
+           delimOf mode,
            T.pack $ show $ length $ filter (\(p,a) -> p==prediction && a==answer) results,
-           centerDelim mode
+           tabOf mode
            ],
-       leftDelim mode
-       ]
-     ]
-
-data Mode = TEXT | TEX deriving (Eq, Show)
-
-showClassificationReport :: (Show label, Eq label) => Int -> [(label,label)] -> T.Text
-showClassificationReport = showClassificationReport' TEXT
-
-leftDelim :: Mode -> T.Text
-leftDelim TEXT = "|"
-leftDelim TEX = ""
-
-centerDelim :: Mode -> T.Text
-centerDelim TEXT = "\t|"
-centerDelim TEX = "&"
+       delimOf mode,
+       crOf mode
+       ],
+    case mode of
+      TEXT -> ""
+      TEX -> "\\end{tabular}\n"
+    ]
 
 showClassificationReport' :: (Show label, Eq label) => Mode -> Int -> [(label,label)] -> T.Text
 showClassificationReport' mode labelLength results = 
@@ -199,36 +213,52 @@ showClassificationReport' mode labelLength results =
   let labels = nub $ pairListToList results
       counts = map (flip classificationCountsFor results) labels  -- ::[ClassificationCounts]
       reports = map count2report $ zip (map (T.pack . show) labels) counts
-  in T.unlines [
-    "Scores:",
-    leftDelim mode,
-    centerDelim mode,
-    " Prec ",
-    centerDelim mode,
-    " Rec ",
-    centerDelim mode,
-    " F1 ",
-    centerDelim mode,
-    " Supp ",
-    centerDelim mode,
-    T.unlines $ for reports $ formatReport mode,
+  in T.concat [
+    "Scores: \n",
+    case mode of
+      TEXT -> ""
+      TEX -> "\\begin{tabular}{lrrrrr}\n",
+    delimOf mode,
+    tabDelim,
+    "Prec ",
+    tabDelim,
+    "Rec ",
+    tabDelim,
+    "F1 ",
+    tabDelim,
+    "Supp ",
+    tabDelim,
+    crOf mode,
+    case mode of
+      TEXT -> ""
+      TEX -> "\\hline\n",
+    T.concat $ for reports $ formatReport mode, 
+    case mode of
+      TEXT -> "\n"
+      TEX -> "\\hline\n",
     formatReport mode $ micro counts,
     formatReport mode $ macro labels counts,
     formatReport mode $ weighted reports,
-    "",
-    "Confusion matrix: ",
+    case mode of
+      TEXT -> ""
+      TEX -> "\\end{tabular}\n",
+    "\n",
+    "Confusion matrix: \n",
     showConfusionMatrix' mode labelLength results
     ]
   where
+    tabDelim :: T.Text
+    tabDelim = T.concat [tabOf mode, delimOf mode]
     formatReport :: Mode -> ClassificationReport -> T.Text
     formatReport mode repo = T.concat [
-      leftDelim mode,
+      delimOf mode,
       T.take labelLength $ title repo,
-      centerDelim mode,
-      T.intercalate (centerDelim mode) $ map (\action -> T.pack $ printf "%3.3f" $ action repo) [precision, recall, f1],
-      centerDelim mode,
+      tabDelim,
+      T.intercalate tabDelim $ map (\action -> T.pack $ printf "%3.3f" $ action repo) [precision, recall, f1],
+      tabDelim,
       T.pack $ show $ support repo,
-      centerDelim mode
+      tabDelim,
+      crOf mode
       ]
 
 average :: (Real a) => [a] -> Double
@@ -246,7 +276,7 @@ stdDev xs = sqrt $ variance xs
 data Animal = Cat | Fish | Hen deriving (Eq, Show)
 
 main :: IO()
-main = T.putStrLn $ showClassificationReport 3 [
+main = T.putStrLn $ showClassificationReport' TEXT 3 [
          (Cat,Cat),(Cat,Cat),(Cat,Cat),(Cat,Cat),
          (Fish,Cat),
          (Hen,Cat),
