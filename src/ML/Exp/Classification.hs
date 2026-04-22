@@ -9,6 +9,7 @@ module ML.Exp.Classification (
   showClassificationReport, 
   showClassificationReport',
   showConfusionMatrix,
+  showConfusionMatrix',
   average,
   variance,
   stdDev,

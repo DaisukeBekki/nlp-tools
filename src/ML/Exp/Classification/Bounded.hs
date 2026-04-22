@@ -5,15 +5,18 @@
 module ML.Exp.Classification.Bounded (
   ClassificationCounts,
   ClassificationReport(..),
+  Mode(..),
   showClassificationReport,
+  showClassificationReport',
   showConfusionMatrix,
+  showConfusionMatrix',
   average,
   variance,
   stdDev,
   main
   ) where
 
-import Data.List (foldl')          --base
+import Data.List (foldl',nub)      --base
 import Text.Printf (printf)        --base
 import qualified Data.Text as T    --text
 import qualified Data.Text.IO as T --text
@@ -145,58 +148,172 @@ calc_f1 precision recall =
 for :: [a] -> (a -> b) -> [b]
 for = flip map
 
-showConfusionMatrix :: (Show label, Eq label, Enum label, Bounded label) => [(label,label)] -> T.Text
-showConfusionMatrix results =
-  let labels = [minBound..maxBound]
-  in T.concat [
-    "|\t",
-    T.concat $ for labels $ \answer -> T.concat [
-       "| ",
-       T.pack $ take labelLength $ show $ answer,
-       "\t"
-       ],
-    "|\n",
-    T.unlines $ for labels $ \prediction -> T.concat [
-       "| ",
-       T.pack $ take labelLength $ show $ prediction,
-       "\t",
-       T.concat $ for labels $ \answer -> T.concat [
-           "| ",
-           T.pack $ show $ length $ filter (\(p,a) -> p==prediction && a==answer) results,
-           "\t"
-           ],
-       "|"
-       ]
-     ]
+pairListToList :: [(a,a)] -> [a]
+pairListToList [] = []
+pairListToList ((x, y):rest) = x:y:(pairListToList rest)
 
-showClassificationReport :: (Show label, Eq label, Enum label, Bounded label) => [(label,label)] -> T.Text
-showClassificationReport results = 
+data Mode = TEXT | TEX deriving (Eq, Show)
+
+showClassificationReport :: (Show label, Eq label, Enum label, Bounded label) => Int -> [(label,label)] -> T.Text
+showClassificationReport = showClassificationReport' TEXT
+
+delimOf :: Mode -> T.Text
+delimOf TEXT = "|"
+delimOf TEX = ""
+
+tabOf :: Mode -> T.Text
+tabOf TEXT = "\t"
+tabOf TEX = " & "
+
+crOf :: Mode -> T.Text
+crOf TEXT = " \n"
+crOf TEX = "  \\\\\n"
+
+showConfusionMatrix :: (Show label, Eq label, Enum label, Bounded label) => Int -> [(label,label)] -> T.Text
+showConfusionMatrix = showConfusionMatrix' TEXT
+
+showConfusionMatrix' :: (Show label, Eq label, Enum label, Bounded label) => Mode -> Int -> [(label,label)] -> T.Text
+showConfusionMatrix' mode labelLength results =
+  let labels = nub $ pairListToList results
+  in T.concat [
+    case mode of
+        TEXT -> ""
+        TEX -> "\\begin{tabular}{lrrrr}\n",
+    delimOf mode,
+    tabOf mode,
+    T.concat $ for labels $ \answer -> T.concat [
+       delimOf mode,
+       T.pack $ take labelLength $ show $ answer,
+       tabOf mode
+       ],
+    delimOf mode,
+    crOf mode,
+    case mode of
+      TEXT -> ""
+      TEX -> "\\hline\n",
+    T.concat $ for labels $ \prediction -> T.concat [
+       delimOf mode,
+       T.pack $ take labelLength $ show $ prediction,
+       tabOf mode,
+       T.concat $ for labels $ \answer -> T.concat [
+           delimOf mode,
+           T.pack $ show $ length $ filter (\(p,a) -> p==prediction && a==answer) results,
+           tabOf mode
+           ],
+       delimOf mode,
+       crOf mode
+       ],
+    case mode of
+      TEXT -> ""
+      TEX -> "\\end{tabular}\n"
+    ]
+
+showClassificationReport' :: (Show label, Eq label, Enum label, Bounded label) => Mode -> Int -> [(label,label)] -> T.Text
+showClassificationReport' mode labelLength results = 
   --let dat = zip predictions answers
-  let labels = [minBound..maxBound]
+  let labels = nub $ pairListToList results
       counts = map (flip classificationCountsFor results) labels  -- ::[ClassificationCounts]
       reports = map count2report $ zip (map (T.pack . show) labels) counts
-  in T.unlines [
-    "Scores:",
-    "|\t| Prec \t| Rec \t| F1 \t| Supp \t|",
-    T.unlines $ for reports formatReport,
-    formatReport $ micro counts,
-    formatReport $ macro labels counts,
-    formatReport $ weighted reports,
-    "",
-    "Confusion matrix: ",
-    showConfusionMatrix results
+  in T.concat [
+    "Scores: \n",
+    case mode of
+      TEXT -> ""
+      TEX -> "\\begin{tabular}{lrrrrr}\n",
+    delimOf mode,
+    tabDelim,
+    "Prec ",
+    tabDelim,
+    "Rec ",
+    tabDelim,
+    "F1 ",
+    tabDelim,
+    "Supp ",
+    tabDelim,
+    crOf mode,
+    case mode of
+      TEXT -> ""
+      TEX -> "\\hline\n",
+    T.concat $ for reports $ formatReport mode, 
+    case mode of
+      TEXT -> "\n"
+      TEX -> "\\hline\n",
+    formatReport mode $ micro counts,
+    formatReport mode $ macro labels counts,
+    formatReport mode $ weighted reports,
+    case mode of
+      TEXT -> ""
+      TEX -> "\\end{tabular}\n",
+    "\n",
+    "Confusion matrix: \n",
+    showConfusionMatrix' mode labelLength results
     ]
   where
-    formatReport :: ClassificationReport -> T.Text
-    formatReport repo = T.concat [
-      "| ",
+    tabDelim :: T.Text
+    tabDelim = T.concat [tabOf mode, delimOf mode]
+    formatReport :: Mode -> ClassificationReport -> T.Text
+    formatReport mode repo = T.concat [
+      delimOf mode,
       T.take labelLength $ title repo,
-      "\t| ",
-      T.intercalate "\t| " $ map (\action -> T.pack $ printf "%3.3f" $ action repo) [precision, recall, f1],
-      "\t| ",
+      tabDelim,
+      T.intercalate tabDelim $ map (\action -> T.pack $ printf "%3.3f" $ action repo) [precision, recall, f1],
+      tabDelim,
       T.pack $ show $ support repo,
-      "\t|"
+      tabDelim,
+      crOf mode
       ]
+
+-- showConfusionMatrix :: (Show label, Eq label, Enum label, Bounded label) => [(label,label)] -> T.Text
+-- showConfusionMatrix results =
+--   let labels = [minBound..maxBound]
+--   in T.concat [
+--     "|\t",
+--     T.concat $ for labels $ \answer -> T.concat [
+--        "| ",
+--        T.pack $ take labelLength $ show $ answer,
+--        "\t"
+--        ],
+--     "|\n",
+--     T.unlines $ for labels $ \prediction -> T.concat [
+--        "| ",
+--        T.pack $ take labelLength $ show $ prediction,
+--        "\t",
+--        T.concat $ for labels $ \answer -> T.concat [
+--            "| ",
+--            T.pack $ show $ length $ filter (\(p,a) -> p==prediction && a==answer) results,
+--            "\t"
+--            ],
+--        "|"
+--        ]
+--      ]
+
+-- showClassificationReport :: (Show label, Eq label, Enum label, Bounded label) => [(label,label)] -> T.Text
+-- showClassificationReport results = 
+--   --let dat = zip predictions answers
+--   let labels = [minBound..maxBound]
+--       counts = map (flip classificationCountsFor results) labels  -- ::[ClassificationCounts]
+--       reports = map count2report $ zip (map (T.pack . show) labels) counts
+--   in T.unlines [
+--     "Scores:",
+--     "|\t| Prec \t| Rec \t| F1 \t| Supp \t|",
+--     T.unlines $ for reports formatReport,
+--     formatReport $ micro counts,
+--     formatReport $ macro labels counts,
+--     formatReport $ weighted reports,
+--     "",
+--     "Confusion matrix: ",
+--     showConfusionMatrix results
+--     ]
+--   where
+--     formatReport :: ClassificationReport -> T.Text
+--     formatReport repo = T.concat [
+--       "| ",
+--       T.take labelLength $ title repo,
+--       "\t| ",
+--       T.intercalate "\t| " $ map (\action -> T.pack $ printf "%3.3f" $ action repo) [precision, recall, f1],
+--       "\t| ",
+--       T.pack $ show $ support repo,
+--       "\t|"
+--       ]
 
 average :: (Real a) => [a] -> Double
 average xs = (realToFrac $ sum xs) / fromIntegral (length xs)
@@ -213,7 +330,7 @@ stdDev xs = sqrt $ variance xs
 data Animal = Cat | Fish | Hen deriving (Eq, Show, Enum, Bounded)
 
 main :: IO()
-main = T.putStrLn $ showClassificationReport [
+main = T.putStrLn $ showClassificationReport' TEXT 3 [
          (Cat,Cat),(Cat,Cat),(Cat,Cat),(Cat,Cat),
          (Fish,Cat),
          (Hen,Cat),
